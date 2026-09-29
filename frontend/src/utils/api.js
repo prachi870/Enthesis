@@ -180,3 +180,12 @@ export const downloadReport = async (paperId) => {
   
   return response.blob()
 }
+
+/**
+ * Approve a completed stage
+ */
+export const approveStage = async (paperId, stage) => {
+  return apiRequest(`/papers/${paperId}/stages/${stage}/approve`, {
+    method: 'POST',
+  })
+}
