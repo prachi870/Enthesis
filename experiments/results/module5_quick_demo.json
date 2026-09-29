@@ -1,0 +1,13 @@
+{
+  "metrics": {
+    "correlation": 0.668740701693646,
+    "spearman_correlation": 0.792824967172092,
+    "mae": 0.037553835212061064,
+    "rmse": 0.04858415756301621
+  },
+  "baseline": {
+    "correlation": 0.31,
+    "n_papers": 40
+  },
+  "note": "Feature-based Ridge regression on style features"
+}

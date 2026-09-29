@@ -1,0 +1,17 @@
+{
+  "ner": {
+    "entity_f1": 0.68,
+    "entity_precision": 0.7,
+    "entity_recall": 0.66
+  },
+  "retrieval": {
+    "retrieval_recall@5": NaN,
+    "retrieval_recall@10": NaN
+  },
+  "baseline": {
+    "extraction_f1": 0.0,
+    "recall_at_5": 0.28,
+    "recall_at_10": 0.35
+  },
+  "note": "Quick demo with pre-trained models"
+}

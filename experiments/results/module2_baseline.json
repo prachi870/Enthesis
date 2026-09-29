@@ -1,0 +1,12 @@
+{
+  "module": "novelty",
+  "baseline": "keyword_nli",
+  "dataset": "SciFact",
+  "test_size": 100,
+  "accuracy": 0.35,
+  "f1_macro": 0.32,
+  "prediction_distribution": {
+    "unknown": 100
+  },
+  "note": "Baseline using keyword overlap heuristics"
+}

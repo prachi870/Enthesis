@@ -1,0 +1,20 @@
+{
+  "module1": {
+    "extraction_f1": 0.0,
+    "recall_at_5": 0.28,
+    "recall_at_10": 0.35
+  },
+  "module2": {
+    "accuracy": 0.35,
+    "f1_macro": 0.32
+  },
+  "module3": {
+    "precision": 0.42,
+    "recall": 0.38,
+    "detections": 5
+  },
+  "module5": {
+    "correlation": 0.31,
+    "n_papers": 40
+  }
+}
