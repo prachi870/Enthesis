@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Brain, Search, AlertTriangle, FileText, CheckCircle2, Clock, XCircle, MessageSquare } from 'lucide-react'
+import { Brain, Search, AlertTriangle, FileText, CheckCircle2, Clock, XCircle, MessageSquare, ThumbsUp } from 'lucide-react'
+import { approveStage } from '../utils/api'
 
-const ModuleCard = ({ title, icon: Icon, status, moduleData, color }) => {
+const ModuleCard = ({ title, icon: Icon, status, moduleData, color, moduleKey, paperId, onApprove }) => {
   const statusConfig = {
     done: { bg: 'bg-green-500/20', border: 'border-green-500/50', text: 'text-green-400', icon: CheckCircle2 },
     running: { bg: 'bg-blue-500/20', border: 'border-blue-500/50', text: 'text-blue-400', icon: Clock },
@@ -39,6 +40,63 @@ const ModuleCard = ({ title, icon: Icon, status, moduleData, color }) => {
           </div>
         )}
       </div>
+
+      {/* Confidence Explanation - Show why this confidence score */}
+      {status === 'done' && confidence > 0 && moduleData && (
+        <div className="mt-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
+          <div className="text-xs font-semibold text-slate-300 mb-2">📊 Analysis Basis</div>
+          <div className="space-y-2 text-xs text-slate-400">
+            {/* Show model used */}
+            {moduleData.model && (
+              <div className="flex items-start space-x-2">
+                <span className="text-blue-400 font-medium">Model:</span>
+                <span>{moduleData.model}</span>
+              </div>
+            )}
+            
+            {/* Show key metrics */}
+            {moduleData.metrics && Object.keys(moduleData.metrics).length > 0 && (
+              <div>
+                <span className="text-blue-400 font-medium">Metrics:</span>
+                <div className="ml-4 mt-1 space-y-1">
+                  {Object.entries(moduleData.metrics).slice(0, 3).map(([key, value]) => (
+                    <div key={key} className="flex justify-between">
+                      <span className="capitalize">{key.replace(/_/g, ' ')}:</span>
+                      <span className="font-mono text-green-400">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Show evidence count */}
+            {evidence.length > 0 && (
+              <div className="flex items-start space-x-2">
+                <span className="text-blue-400 font-medium">Evidence:</span>
+                <span>{evidence.length} supporting data points analyzed</span>
+              </div>
+            )}
+            
+            {/* Show analysis scope */}
+            {findings.length > 0 && (
+              <div className="flex items-start space-x-2">
+                <span className="text-blue-400 font-medium">Findings:</span>
+                <span>{findings.length} distinct patterns identified</span>
+              </div>
+            )}
+
+            {/* Confidence interpretation */}
+            <div className="mt-2 pt-2 border-t border-slate-700/50">
+              <span className="text-purple-400 font-medium">Confidence Context:</span>
+              <p className="mt-1 text-slate-300">
+                {confidence >= 0.8 ? '🟢 High confidence - strong evidence and clear patterns detected' :
+                 confidence >= 0.6 ? '🟡 Moderate confidence - reasonable evidence with some limitations' :
+                 '🟠 Lower confidence - preliminary analysis, may need expert review'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {status === 'done' && findings.length > 0 && (
         <div className="space-y-3 mt-4">
@@ -210,10 +268,27 @@ const ModuleCard = ({ title, icon: Icon, status, moduleData, color }) => {
 
           {/* Show limitations */}
           {moduleData?.limitations && moduleData.limitations.length > 0 && (
-            <div className="mt-3 text-xs text-slate-500 bg-slate-800/20 p-2 rounded">
-              ⚠️ {moduleData.limitations[0]}
+            <div className="mt-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+              <div className="text-xs font-semibold text-amber-300 mb-2">⚠️ Current Limitations</div>
+              <ul className="text-xs text-slate-400 space-y-1">
+                {moduleData.limitations.map((limitation, i) => (
+                  <li key={i} className="flex items-start space-x-2">
+                    <span className="text-amber-400 mt-0.5">•</span>
+                    <span>{limitation}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
+
+          {/* Approval button for done modules */}
+          <button
+            onClick={() => onApprove && onApprove(moduleKey)}
+            className="mt-4 w-full py-2 px-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+          >
+            <ThumbsUp className="w-4 h-4" />
+            <span>Approve & Continue</span>
+          </button>
         </div>
       )}
 
@@ -242,10 +317,28 @@ const ModuleCard = ({ title, icon: Icon, status, moduleData, color }) => {
 
 const AnalysisPanel = ({ data, paperId }) => {
   const [fullData, setFullData] = useState(data)
+  const [approvingModule, setApprovingModule] = useState(null)
 
   useEffect(() => {
     setFullData(data)
   }, [data])
+
+  const handleApprove = async (moduleKey) => {
+    setApprovingModule(moduleKey)
+    try {
+      const result = await approveStage(paperId, moduleKey)
+      // Update local state with new states
+      setFullData(prev => ({
+        ...prev,
+        states: result.states
+      }))
+    } catch (error) {
+      console.error('Error approving stage:', error)
+      alert(error.message || 'Failed to approve stage')
+    } finally {
+      setApprovingModule(null)
+    }
+  }
 
   const modules = [
     {
