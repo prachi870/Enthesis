@@ -116,17 +116,24 @@ class Orchestrator:
                     raise PipelineError("Document has no extractable text")
                 run.results[stage.value] = {"chars": len(run.text)}
             else:
-                # Pass previous results for context (needed for Module 4)
-                previous_results = {}
-                for prev_stage in [Stage.RELATED_WORK, Stage.NOVELTY, Stage.WEAKNESSES, Stage.CLARITY]:
-                    if run.states[prev_stage.value] == StageState.APPROVED:
-                        previous_results[prev_stage.value] = run.results.get(prev_stage.value)
+                # Module 4 (Reviewer Feedback) needs previous results, others don't
+                if stage == Stage.REVIEWER_FEEDBACK:
+                    # Gather previous results for Module 4
+                    previous_results = {}
+                    for prev_stage in [Stage.RELATED_WORK, Stage.NOVELTY, Stage.WEAKNESSES, Stage.CLARITY]:
+                        if run.states[prev_stage.value] == StageState.APPROVED:
+                            previous_results[prev_stage.value] = run.results.get(prev_stage.value)
+                    
+                    res: ModuleResult = self.modules[stage.value].predict(
+                        {"text": run.text},
+                        previous_results
+                    )
+                else:
+                    # All other modules (1, 2, 3, 5) only take paper_data
+                    res: ModuleResult = self.modules[stage.value].predict(
+                        {"text": run.text}
+                    )
                 
-                # Run the module
-                res: ModuleResult = self.modules[stage.value].predict(
-                    {"text": run.text},
-                    previous_results if stage == Stage.REVIEWER_FEEDBACK else None
-                )
                 run.results[stage.value] = res.model_dump()
             
             # Mark as DONE (waiting for student approval)
