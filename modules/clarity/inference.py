@@ -43,9 +43,9 @@ class FastClarityAnalyzer:
         
         # Feature 5: Vague phrases
         vague_phrases = ['a lot of', 'many', 'several', 'various', 'numerous', 'some']
-        vague_count = sum(1 for s in sentences.lower()
+        vague_count = sum(1 for s in sentences
                          for phrase in vague_phrases 
-                         if phrase in s)
+                         if phrase in s.lower())
         
         # Feature 6: Repetitive words
         all_words = ' '.join(sentences).lower().split()
