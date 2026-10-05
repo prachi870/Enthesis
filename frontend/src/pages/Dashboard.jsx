@@ -103,7 +103,7 @@ function Dashboard() {
     })
 
   return (
-    <div className="min-h-screen">
+    <div className="dashboard-page min-h-screen">
       {/* 3D Background - More Subtle */}
       <div className="fixed inset-0 z-0 opacity-20">
         <Scene3D />
@@ -112,10 +112,10 @@ function Dashboard() {
       {/* Main Content */}
       <div className="relative z-10">
         {/* Header */}
-        <header className="bg-slate-900/80 backdrop-blur-xl border-b border-slate-700/50 sticky top-0 z-50">
-          <div className="container mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
+        <header className="dashboard-header bg-slate-900/80 backdrop-blur-xl border-b border-slate-700/50 sticky top-0 z-50">
+          <div className="dashboard-header-inner container mx-auto px-6 py-4">
+            <div className="dashboard-header-row flex items-center justify-between">
+              <div className="dashboard-brand flex items-center space-x-4">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                   <Sparkles className="w-6 h-6 text-white" />
                 </div>
@@ -125,7 +125,7 @@ function Dashboard() {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4">
+              <div className="dashboard-nav flex items-center space-x-4">
                 <Link
                   to="/analyze"
                   className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
@@ -133,7 +133,28 @@ function Dashboard() {
                   <PlusCircle className="w-4 h-4" />
                   <span>New Analysis</span>
                 </Link>
-                
+
+                <Link
+                  to="/my-research-papers"
+                  className="px-4 py-2 border border-slate-600 hover:bg-slate-800 text-white font-semibold rounded-lg transition-colors"
+                >
+                  My Research Papers
+                </Link>
+
+                <Link
+                  to="/research-papers/new"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg transition-colors"
+                >
+                  Paper Builder
+                </Link>
+
+                <Link
+                  to="/college-reports"
+                  className="px-4 py-2 border border-emerald-600/60 hover:bg-emerald-950/50 text-emerald-100 font-semibold rounded-lg transition-colors"
+                >
+                  College Report Generator
+                </Link>
+
                 <div className="flex items-center space-x-3 px-4 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
                   <div className="text-right">
                     <div className="text-sm font-semibold text-white">{user?.name || 'User'}</div>
@@ -153,8 +174,8 @@ function Dashboard() {
         </header>
 
         {/* Stats Overview */}
-        <div className="container mx-auto px-6 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="dashboard-content container mx-auto px-6 py-8">
+          <div className="dashboard-stats grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-slate-800/70 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 shadow-xl">
               <div className="flex items-center justify-between mb-2">
                 <FileText className="w-8 h-8 text-blue-400" />

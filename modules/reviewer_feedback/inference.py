@@ -29,7 +29,6 @@ class ReviewerFeedbackGenerator:
         previous_findings = previous_findings or {}
         
         # Extract previous module issues for context
-        related_work_issues = previous_findings.get("related_work", {})
         novelty_issues = previous_findings.get("novelty", {})
         weakness_issues = previous_findings.get("weaknesses", {})
         clarity_issues = previous_findings.get("clarity", {})
@@ -37,22 +36,7 @@ class ReviewerFeedbackGenerator:
         # Common reviewer concern patterns (baseline approach)
         feedback_items = []
         
-        # 1. Related Work Coverage
-        if related_work_issues.get("papers_found", 0) < 5:
-            feedback_items.append({
-                "concern_type": "insufficient_related_work",
-                "severity": "major",
-                "reviewer_style": "thorough",
-                "feedback": (
-                    "The related work section appears limited. A comprehensive survey of recent work "
-                    "in this area would strengthen the positioning of this contribution."
-                ),
-                "evidence": "Limited papers found in related work analysis",
-                "suggested_action": "Expand literature review to include recent publications in the field",
-                "confidence": 0.7
-            })
-        
-        # 2. Novelty Concerns
+        # Novelty Concerns
         if novelty_issues.get("contradicted_claims", 0) > 0:
             feedback_items.append({
                 "concern_type": "novelty_questioned",
@@ -65,42 +49,42 @@ class ReviewerFeedbackGenerator:
                 ),
                 "evidence": "Novelty contradictions detected",
                 "suggested_action": "Refine novelty claims to clearly distinguish from existing work",
-                "confidence": 0.8
             })
         
-        # 3. Methodology Weaknesses
-        if weakness_issues.get("categories", []):
-            for category in weakness_issues.get("categories", [])[:3]:
-                if category == "missing_baseline":
-                    feedback_items.append({
-                        "concern_type": "experimental_design",
-                        "severity": "major",
-                        "reviewer_style": "methodical",
-                        "feedback": (
-                            "The experimental evaluation would benefit from comparison against "
-                            "established baselines. Without this, it's difficult to assess the "
-                            "magnitude of improvement."
-                        ),
-                        "evidence": "Missing baseline detection",
-                        "suggested_action": "Add baseline comparisons (simple baseline, state-of-the-art)",
-                        "confidence": 0.75
-                    })
-                elif category == "weak_evaluation":
-                    feedback_items.append({
-                        "concern_type": "evaluation_rigor",
-                        "severity": "moderate",
-                        "reviewer_style": "methodical",
-                        "feedback": (
-                            "The evaluation could be more rigorous. Consider including additional "
-                            "metrics, ablation studies, and statistical significance testing."
-                        ),
-                        "evidence": "Weak evaluation patterns detected",
-                        "suggested_action": "Strengthen evaluation with multiple metrics and statistical tests",
-                        "confidence": 0.7
-                    })
+        # Methodology and evaluation concerns inherited from the actual weakness output.
+        weakness_items = []
+        for finding in weakness_issues.get("findings", []):
+            if isinstance(finding, dict) and isinstance(finding.get("weaknesses"), list):
+                weakness_items.extend(finding["weaknesses"])
+        for issue in weakness_items[:5]:
+            if not isinstance(issue, dict):
+                continue
+            category = issue.get("category", "methodology")
+            concern_type = "evaluation_rigor" if category == "weak_evaluation" else "experimental_design"
+            feedback_items.append({
+                "concern_type": concern_type,
+                "severity": issue.get("severity", "moderate"),
+                "reviewer_style": "methodical",
+                "feedback": (
+                    f"Potential {category.replace('_', ' ')} issue for author investigation: "
+                    f"{issue.get('text', 'review this pattern in context of the paper')}."
+                ),
+                "evidence": issue.get("text", ""),
+                "suggested_action": (
+                    "Verify this pattern against the study details and document supporting evidence or rationale."
+                ),
+            })
         
         # 4. Clarity Issues
-        if clarity_issues.get("clarity_score", 1.0) < 0.6:
+        clarity_score = next(
+            (
+                item.get("clarity_score")
+                for item in clarity_issues.get("findings", [])
+                if isinstance(item, dict) and item.get("type") == "overall_score"
+            ),
+            1.0,
+        )
+        if clarity_score < 0.6:
             feedback_items.append({
                 "concern_type": "writing_clarity",
                 "severity": "minor",
@@ -109,9 +93,8 @@ class ReviewerFeedbackGenerator:
                     "The manuscript would benefit from careful proofreading. Several passages "
                     "could be made clearer and more precise."
                 ),
-                "evidence": f"Clarity score: {clarity_issues.get('clarity_score', 0.5):.2f}",
+                "evidence": "Surface-level clarity patterns were flagged by the clarity module.",
                 "suggested_action": "Revise for clarity, reduce passive voice, be more specific",
-                "confidence": 0.65
             })
         
         # 5. General Methodological Concerns (pattern-based)
@@ -131,7 +114,6 @@ class ReviewerFeedbackGenerator:
                     ),
                     "evidence": "No baseline mentioned in methodology",
                     "suggested_action": "Add baseline experiments and comparisons",
-                    "confidence": 0.6
                 })
         
         # 6. Reproducibility
@@ -146,7 +128,6 @@ class ReviewerFeedbackGenerator:
                 ),
                 "evidence": "No code availability mentioned",
                 "suggested_action": "Include code repository link or plan to release code",
-                "confidence": 0.5
             })
         
         # Aggregate by severity
@@ -154,22 +135,12 @@ class ReviewerFeedbackGenerator:
         moderate_concerns = [f for f in feedback_items if f["severity"] == "moderate"]
         minor_concerns = [f for f in feedback_items if f["severity"] == "minor"]
         
-        # Overall recommendation (pattern-based)
-        if len(major_concerns) >= 3:
-            overall = "reject"
-            summary = "Multiple major concerns require substantial revision"
-        elif len(major_concerns) >= 1:
-            overall = "major_revision"
-            summary = "Significant issues need addressing before acceptance"
-        elif len(moderate_concerns) >= 2:
-            overall = "minor_revision"
-            summary = "Paper is promising but needs refinement"
-        else:
-            overall = "accept_with_minor_revisions"
-            summary = "Paper is generally sound with minor improvements needed"
+        summary = (
+            f"The rule-based baseline generated {len(feedback_items)} potential concern(s) "
+            "for researcher investigation; this is not a peer-review decision."
+        )
         
         return {
-            "overall_assessment": overall,
             "summary": summary,
             "feedback_items": feedback_items,
             "major_concerns": len(major_concerns),
@@ -229,10 +200,8 @@ class ReviewerFeedbackModule(NLPModule):
         # Format findings
         findings = [
             {
-                "type": "overall_assessment",
-                "assessment": analysis["overall_assessment"],
+                "type": "concern_summary",
                 "summary": analysis["summary"],
-                "confidence": 0.5,  # Lower confidence for baseline
             },
             {
                 "type": "concern_counts",
@@ -257,7 +226,7 @@ class ReviewerFeedbackModule(NLPModule):
                 "feedback": item["feedback"],
                 "evidence_basis": item["evidence"],
                 "suggested_action": item["suggested_action"],
-                "confidence": item["confidence"],
+                "confidence": item.get("confidence"),
             })
         
         limitations = [
@@ -274,7 +243,6 @@ class ReviewerFeedbackModule(NLPModule):
             module=self.name,
             model="pattern_based_reviewer_baseline",
             status="completed",
-            confidence=0.35,  # Low confidence for pattern-based baseline
             findings=findings,
             evidence=evidence,
             metrics={

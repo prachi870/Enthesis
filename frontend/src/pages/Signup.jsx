@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Sparkles, Mail, Lock, User, UserPlus } from 'lucide-react'
+import AuthShowcase from '../components/AuthShowcase'
 
 function Signup() {
   const navigate = useNavigate()
@@ -32,16 +33,19 @@ function Signup() {
     }
 
     try {
+      const email = String(formData.email || '').trim().toLowerCase()
+      const username = email.split('@')[0].trim().toLowerCase()
+
       // Call real signup API
-      const response = await fetch('http://localhost:8000/api/v1/auth/signup', {
+      const response = await fetch('/api/v1/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: formData.email,
-          username: formData.email.split('@')[0], // Use email prefix as username
-          full_name: formData.name,
+          email,
+          username,
+          full_name: String(formData.name || '').trim(),
           password: formData.password
         })
       })
@@ -66,10 +70,10 @@ function Signup() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 py-12">
-      {/* Background gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-pink-900/20"></div>
-      
+    <main className="auth-page auth-page-signup">
+      <div className="auth-layout">
+        <AuthShowcase />
+        <div className="auth-form-column">
       <div className="relative w-full max-w-md">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
@@ -83,7 +87,7 @@ function Signup() {
         </div>
 
         {/* Signup Form */}
-        <div className="bg-slate-800/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+        <div className="auth-form-card bg-slate-800/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg text-sm">
@@ -247,7 +251,9 @@ function Signup() {
           Protected by industry-standard encryption
         </p>
       </div>
-    </div>
+        </div>
+      </div>
+    </main>
   )
 }
 

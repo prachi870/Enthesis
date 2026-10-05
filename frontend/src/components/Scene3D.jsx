@@ -355,11 +355,39 @@ const Scene3D = () => {
       {/* Data particle streams */}
       <DataStreams count={400} />
       
-      {/* Floating module labels */}
-      <FloatingLabel text="Related Work" position={[-7, 3.5, 0]} color="#3b82f6" />
+      {/* Floating module labels with more context */}
+      <FloatingLabel text="Related Work Analysis" position={[-7, 3.5, 0]} color="#3b82f6" />
       <FloatingLabel text="Novelty Detection" position={[7, 2, -1]} color="#10b981" />
-      <FloatingLabel text="Weaknesses" position={[-6, -3, 1]} color="#ec4899" />
+      <FloatingLabel text="Weakness Identification" position={[-6, -3, 1]} color="#ec4899" />
       <FloatingLabel text="Clarity Analysis" position={[6, -2.5, 2]} color="#8b5cf6" />
+      <FloatingLabel text="AI-Powered Insights" position={[0, 5, -3]} color="#f59e0b" />
+      <FloatingLabel text="Research Excellence" position={[-8, 0, 3]} color="#06b6d4" />
+      <FloatingLabel text="Critical Review" position={[8, -1, 0]} color="#ef4444" />
+      
+      {/* Inspiring quotes in 3D space */}
+      <Float speed={2} rotationIntensity={0.1} floatIntensity={1.2} position={[0, -5, 2]}>
+        <Html center distanceFactor={20}>
+          <div className="text-gradient text-3xl font-bold tracking-wide text-center opacity-40 select-none">
+            TRANSFORM RESEARCH
+          </div>
+        </Html>
+      </Float>
+      
+      <Float speed={1.8} rotationIntensity={0.15} floatIntensity={1} position={[-9, 2, -2]}>
+        <Html center distanceFactor={18}>
+          <div className="text-purple-400 text-xl font-semibold opacity-30 select-none">
+            AI AUGMENTED
+          </div>
+        </Html>
+      </Float>
+      
+      <Float speed={2.2} rotationIntensity={0.12} floatIntensity={0.9} position={[9, -2, -1]}>
+        <Html center distanceFactor={18}>
+          <div className="text-blue-400 text-xl font-semibold opacity-30 select-none">
+            INTELLIGENT ANALYSIS
+          </div>
+        </Html>
+      </Float>
       
       {/* Camera controls with auto-rotation */}
       <OrbitControls 

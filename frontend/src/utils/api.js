@@ -1,8 +1,9 @@
 /**
  * API utility functions for authenticated requests
  */
+import { supabase } from '../lib/supabase'
 
-const API_BASE_URL = 'http://localhost:8000/api/v1'
+const API_BASE_URL = '/api/v1'
 
 /**
  * Get auth token from localStorage
@@ -29,10 +30,16 @@ export const isAuthenticated = () => {
 /**
  * Logout user
  */
-export const logout = () => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
-  window.location.href = '/login'
+export const logout = async () => {
+  try {
+    if (supabase) await supabase.auth.signOut({ scope: 'local' })
+  } catch (error) {
+    if (import.meta.env.DEV) console.error('Supabase sign-out failed:', error)
+  } finally {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    window.location.href = '/login'
+  }
 }
 
 /**
@@ -122,6 +129,13 @@ export const getPapers = async (search = '') => {
  * Get paper details
  */
 export const getPaper = async (paperId) => {
+  return apiRequest(`/papers/${paperId}`)
+}
+
+/**
+ * Get paper with full text
+ */
+export const getPaperWithText = async (paperId) => {
   return apiRequest(`/papers/${paperId}`)
 }
 

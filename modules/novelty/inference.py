@@ -29,47 +29,27 @@ class NoveltyModule(NLPModule):
             matches = re.findall(f'.{{0,50}}{pattern}.{{0,50}}', text_lower, re.I)
             novel_claims.extend(matches[:3])
         
-        # Detect entailment indicators
-        supported = len(re.findall(r'(?:consistent|aligns)\s+with|(?:builds|based)\s+on|extends', text_lower))
-        contradicted = len(re.findall(r'(?:contrary|unlike|different\s+from)|(?:disagrees|contradicts)\s+with', text_lower))
-        
-        # Check for existing work mentions
-        existing_work = len(re.findall(r'(?:previous|prior|existing)\s+(?:work|research|studies|approaches)', text_lower))
-        
-        # Calculate novelty score using NLI-style logic
-        total_claims = len(novel_claims)
-        novelty_score = min(1.0, max(0.0, (total_claims - existing_work * 0.3) / max(total_claims + 1, 5)))
-        
-        # Classify claims
-        novel_count = max(1, total_claims - contradicted)
-        non_novel_count = max(1, existing_work // 2)
-        
+        unique_claims = list(dict.fromkeys(claim.strip() for claim in novel_claims if claim.strip()))
+
         return ModuleResult(
             module="novelty",
-            model="NLI_baseline (DeBERTa-style analysis)",
+            model="pattern_matching_claim_extraction",
             status="completed",
-            confidence=0.72,
             findings=[{
                 "type": "novelty_analysis",
-                "novel_claims": novel_count,
-                "non_novel_claims": non_novel_count,
-                "novelty_score": round(novelty_score, 3),
-                "entailment_supported": supported,
-                "entailment_contradicted": contradicted,
-                "summary": f"Identified {novel_count} novel contributions. Claims checked against {existing_work} existing work references."
+                "claims_found": len(unique_claims),
+                "summary": (
+                    f"Extracted {len(unique_claims)} potential novelty claim(s) by text pattern. "
+                    "No literature-corpus comparison was performed."
+                )
             }],
             evidence=[
-                {"claim": claim[:100] + "..." if len(claim) > 100 else claim, "status": "novel"}
-                for claim in novel_claims[:5]
+                {"claim": claim, "classification": "requires_investigation"}
+                for claim in unique_claims[:10]
             ],
-            metrics={
-                "accuracy": "0.71 (baseline)",
-                "f1_score": "0.71",
-                "novelty_score": round(novelty_score, 3)
-            },
+            metrics={"claims_found": len(unique_claims)},
             limitations=[
-                "Using pattern matching baseline (fine-tuned NLI model in Phase 2)",
-                "SciFact dataset needed for full entailment checking",
-                "Cannot verify claims against full literature corpus yet"
+                "Pattern matching identifies claim wording only and does not determine novelty.",
+                "No external literature search or NLI comparison was performed."
             ]
         )

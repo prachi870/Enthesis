@@ -12,6 +12,8 @@ Enthesis is a production-ready AI-powered research assistant that analyzes acade
 - **Real Authentication**: JWT + PostgreSQL
 - **RESTful API**: Complete FastAPI backend
 - **Structured Reports**: Detailed feedback per module
+- **Research Paper Builder**: Save drafts, generate and analyze structured papers, manage versions, and export academic documents
+- **College Report Generator**: Analyze college samples, extract project documents, collect missing section details, and export separately formatted college reports
 
 ## 🚀 Quick Start
 
@@ -86,6 +88,58 @@ npm run dev
 - `POST /api/v1/auth/login` - Login user
 - `GET /api/v1/auth/me` - Get current user
 - `POST /api/v1/auth/logout` - Logout user
+
+### Research Paper Builder
+- `GET /api/v1/research-papers` - List saved research papers
+- `POST /api/v1/research-papers` - Save a paper draft
+- `GET /api/v1/research-papers/{paper_id}` - Retrieve a saved paper
+- `POST /api/v1/research-papers/{paper_id}/generate` - Generate a complete, assumption-labeled draft from supplied project details
+- `POST /api/v1/research-papers/{paper_id}/analyze` - Run Enthesis analysis
+- `GET /api/v1/research-papers/{paper_id}/analysis/{run_id}` - Poll persisted per-module progress and findings
+- `POST /api/v1/research-papers/{paper_id}/analysis/{run_id}/retry/{module}` - Retry a failed module
+- `GET|POST /api/v1/research-papers/{paper_id}/analysis/{run_id}/actions` - List or create finding-linked research tasks
+- `PATCH /api/v1/research-papers/{paper_id}/analysis/{run_id}/actions/{action_id}` - Update task status
+- `GET /api/v1/research-papers/{paper_id}/analysis/{run_id}/report` - Generate a report from that saved analysis
+- `GET /api/v1/research-papers/{paper_id}/export?format=pdf|docx|latex|markdown` - Export a paper
+
+### College Report Generator
+- `POST /api/v1/college-reports/templates/analyze` - Upload and inspect a college-provided sample
+- `POST /api/v1/college-reports/templates/{template_id}/save` - Save an analyzed template, including its semester label
+- `GET /api/v1/college-reports/templates` - List saved and analyzed college templates
+- `POST /api/v1/college-reports/templates/{template_id}/reanalyze` - Refresh section detection from a saved template
+- `POST /api/v1/college-reports/reports` - Create a separate college report and extract uploaded project files
+- `GET /api/v1/college-reports/reports` - List college reports
+- `GET /api/v1/college-reports/reports/{report_id}` - Retrieve extracted material and report draft
+- `PUT /api/v1/college-reports/reports/{report_id}/information` - Save information supplied for required sections
+- `POST /api/v1/college-reports/reports/{report_id}/compare` - Compare template requirements with provided source material
+- `POST /api/v1/college-reports/reports/{report_id}/generate` - Generate a template-ordered report from supplied information
+- `POST /api/v1/college-reports/reports/{report_id}/validate` - Validate section coverage and supported formatting
+- `GET /api/v1/college-reports/reports/{report_id}/export?format=pdf|docx` - Export the college report
+
+The College Report Generator uses its own `college_report_templates` and `college_reports`
+database tables and `/college-reports` UI. It does not read or write Research Paper Builder
+drafts, analysis runs, or paper exports. It extracts headings and supported DOCX styles from
+the uploaded sample, preserves its section order, and applies supported page margins/fonts to
+PDF/DOCX output. Missing project facts are requested from the user rather than invented.
+Project-information extraction only maps text under recognizable section headings; documents
+without such headings remain available as extracted source text and require manual section input.
+
+Generated prose for missing sections is labeled as assumption-based and must be verified.
+Unreported experimental outcomes remain hypothetical, and missing references are explicitly
+placeholders rather than fabricated citations. The builder preview is justified and shows
+the full paper; DOCX export applies academic typography, justified body paragraphs, and a
+two-column section layout for IEEE papers. Paper-format choices include APA student-paper,
+MLA, Chicago Notes and Bibliography, IEEE, Generic, University, IMRaD, Conference, and
+Thesis styles. Format selection changes the paper's structure and formatting, not its
+supplied research content. APA and MLA title-page fields can be entered in the project
+details form; citation entries and their locations must be supplied by the author.
+The Analyze Paper workspace runs all five existing modules against the saved manuscript
+version and persists each module's state and output. It provides paper-passage navigation,
+finding evidence, investigation tasks, re-analysis comparisons, and reports. The current
+Related Work module extracts terms but does not retrieve papers, so the interface marks
+related-paper retrieval and similarity as unavailable instead of displaying synthetic
+sources. Heuristic novelty and reviewer-style observations are not novelty decisions,
+peer reviews, or publication predictions.
 
 ### Papers (Requires Authentication)
 - `GET /api/v1/papers/list` - List all papers

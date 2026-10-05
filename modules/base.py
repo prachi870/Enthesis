@@ -10,7 +10,7 @@ class ModuleResult(BaseModel):
     module: str
     status: ModuleStatus = "completed"
     model: str = "baseline"
-    confidence: float = 0.0
+    confidence: float | None = None
     findings: list[dict[str, Any]] = Field(default_factory=list)
     evidence: list[dict[str, Any]] = Field(default_factory=list)
     metrics: dict[str, Any] = Field(default_factory=dict)  # never fabricate; empty/"TBD" until measured

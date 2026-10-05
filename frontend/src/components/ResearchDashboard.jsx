@@ -142,31 +142,35 @@ const ResearchDashboard = ({ onPaperSelect, onUploadSuccess }) => {
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen p-6 relative overflow-hidden">
+      {/* Animated gradient orbs in background */}
+      <div className="fixed top-20 right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse-soft"></div>
+      <div className="fixed bottom-20 left-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: '1s' }}></div>
+      
+      <div className="max-w-7xl mx-auto space-y-6 relative z-10">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between animate-float-gentle">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Research Dashboard</h1>
-            <p className="text-slate-400">Track and manage your academic paper analyses</p>
+            <h1 className="text-5xl font-bold text-gradient mb-3">Research Dashboard</h1>
+            <p className="text-slate-400 text-lg">Track and manage your academic paper analyses</p>
           </div>
           <button
             onClick={() => setShowUpload(!showUpload)}
-            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center space-x-2"
+            className="btn-primary flex items-center space-x-2 text-lg px-8 py-4"
           >
-            <Upload className="w-5 h-5" />
+            <Upload className="w-6 h-6" />
             <span>Upload Paper</span>
           </button>
         </div>
 
         {/* Upload Modal */}
         {showUpload && (
-          <div className="bg-slate-900/70 backdrop-blur-lg rounded-xl border border-slate-700/50 p-6 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold">Upload Research Paper</h3>
+          <div className="glass-card rounded-2xl p-8 shadow-2xl animate-float-gentle border-purple-500/30">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gradient">Upload Research Paper</h3>
               <button 
                 onClick={() => setShowUpload(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-white hover:bg-slate-800 p-2 rounded-lg transition-all"
               >
                 ✕
               </button>
@@ -205,31 +209,37 @@ const ResearchDashboard = ({ onPaperSelect, onUploadSuccess }) => {
         </div>
 
         {/* Overview Stats */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="bg-slate-900/70 backdrop-blur-lg rounded-xl border border-green-500/30 p-6">
-            <div className="flex items-center space-x-3">
-              <CheckCircle2 className="w-8 h-8 text-green-400" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="glass-card rounded-2xl border-green-500/30 p-8 group hover:border-green-500/50 transition-all">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 gradient-bg-green rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                <CheckCircle2 className="w-9 h-9 text-white" />
+              </div>
               <div>
-                <div className="text-3xl font-bold text-white">{stats.completed}</div>
-                <div className="text-sm text-slate-400">Completed</div>
+                <div className="text-5xl font-bold text-glow-green">{stats.completed}</div>
+                <div className="text-sm text-slate-400 font-medium mt-1">Completed</div>
               </div>
             </div>
           </div>
-          <div className="bg-slate-900/70 backdrop-blur-lg rounded-xl border border-blue-500/30 p-6">
-            <div className="flex items-center space-x-3">
-              <Clock className="w-8 h-8 text-blue-400" />
+          <div className="glass-card rounded-2xl border-blue-500/30 p-8 group hover:border-blue-500/50 transition-all">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 gradient-bg-blue rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                <Clock className="w-9 h-9 text-white" />
+              </div>
               <div>
-                <div className="text-3xl font-bold text-white">{stats.processing}</div>
-                <div className="text-sm text-slate-400">In Progress</div>
+                <div className="text-5xl font-bold text-glow-blue">{stats.processing}</div>
+                <div className="text-sm text-slate-400 font-medium mt-1">In Progress</div>
               </div>
             </div>
           </div>
-          <div className="bg-slate-900/70 backdrop-blur-lg rounded-xl border border-red-500/30 p-6">
-            <div className="flex items-center space-x-3">
-              <XCircle className="w-8 h-8 text-red-400" />
+          <div className="glass-card rounded-2xl border-red-500/30 p-8 group hover:border-red-500/50 transition-all">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 gradient-bg-red rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                <XCircle className="w-9 h-9 text-white" />
+              </div>
               <div>
-                <div className="text-3xl font-bold text-white">{stats.failed}</div>
-                <div className="text-sm text-slate-400">Failed</div>
+                <div className="text-5xl font-bold text-red-400">{stats.failed}</div>
+                <div className="text-sm text-slate-400 font-medium mt-1">Failed</div>
               </div>
             </div>
           </div>
@@ -238,16 +248,16 @@ const ResearchDashboard = ({ onPaperSelect, onUploadSuccess }) => {
         {/* Filters */}
         <div className="flex items-center space-x-4">
           <div className="relative flex-1">
-            <Search className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+            <Search className="w-5 h-5 text-purple-400 absolute left-4 top-1/2 transform -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search papers by name or author..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-900/70 border border-slate-700 rounded-lg pl-10 pr-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
+              className="input-modern w-full pl-12 pr-4 py-4 text-lg"
             />
           </div>
-          <div className="flex items-center space-x-2 bg-slate-900/70 border border-slate-700 rounded-lg p-1">
+          <div className="flex items-center space-x-2 glass-card rounded-xl p-2">
             <FilterButton active={filter === 'all'} onClick={() => setFilter('all')}>All</FilterButton>
             <FilterButton active={filter === 'processing'} onClick={() => setFilter('processing')}>Processing</FilterButton>
             <FilterButton active={filter === 'completed'} onClick={() => setFilter('completed')}>Completed</FilterButton>
@@ -256,9 +266,12 @@ const ResearchDashboard = ({ onPaperSelect, onUploadSuccess }) => {
         </div>
 
         {/* Papers List */}
-        <div className="bg-slate-900/70 backdrop-blur-lg rounded-xl border border-slate-700/50 shadow-xl">
-          <div className="p-6 border-b border-slate-700/50">
-            <h2 className="text-xl font-semibold">Recent Papers ({filteredPapers.length})</h2>
+        <div className="glass-card rounded-2xl shadow-2xl border-purple-500/20">
+          <div className="p-8 border-b border-slate-700/50">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gradient">Recent Papers</h2>
+              <span className="badge badge-purple text-lg px-4 py-2">{filteredPapers.length} papers</span>
+            </div>
           </div>
           
           {loading ? (
@@ -372,26 +385,28 @@ const ResearchDashboard = ({ onPaperSelect, onUploadSuccess }) => {
 }
 
 const StatCard = ({ icon: Icon, label, value, color, pulse }) => (
-  <div className={`bg-slate-900/70 backdrop-blur-lg rounded-xl border border-slate-700/50 p-6 shadow-xl ${pulse ? 'animate-pulse' : ''}`}>
+  <div className={`stat-card group cursor-pointer ${pulse ? 'pulse-glow' : ''}`}>
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-slate-400 text-sm mb-1">{label}</p>
-        <p className="text-3xl font-bold text-white">{value}</p>
+        <p className="text-slate-400 text-sm mb-1 font-medium">{label}</p>
+        <p className="text-4xl font-bold text-white mb-1">{value}</p>
+        <div className="h-1 w-16 rounded-full bg-gradient-to-r ${color} opacity-75"></div>
       </div>
-      <div className={`w-14 h-14 bg-gradient-to-br ${color} rounded-xl flex items-center justify-center`}>
-        <Icon className="w-7 h-7 text-white" />
+      <div className={`w-16 h-16 bg-gradient-to-br ${color} rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
+        <Icon className="w-8 h-8 text-white" />
       </div>
     </div>
+    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br ${color} opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
   </div>
 )
 
 const FilterButton = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
-    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+    className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${
       active 
-        ? 'bg-blue-500 text-white' 
-        : 'text-slate-400 hover:text-white hover:bg-slate-800'
+        ? 'gradient-bg-purple text-white shadow-lg' 
+        : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
     }`}
   >
     {children}

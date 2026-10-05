@@ -21,9 +21,8 @@ class WeaknessModule(NLPModule):
         if not has_baseline:
             weaknesses.append({
                 "category": "missing_baseline",
-                "text": "No baseline comparison found - reviewers expect comparison with existing methods",
+                "text": "No baseline comparison pattern was detected; verify whether a baseline is applicable and documented.",
                 "severity": "high",
-                "confidence": 0.85
             })
         
         # 2. Check evaluation strength
@@ -35,14 +34,12 @@ class WeaknessModule(NLPModule):
                 "category": "weak_evaluation",
                 "text": "Limited experimental validation - more comprehensive experiments needed",
                 "severity": "high",
-                "confidence": 0.90
             })
         elif not has_multiple_datasets:
             weaknesses.append({
                 "category": "weak_evaluation",
                 "text": "Evaluation on single dataset - testing on multiple datasets would strengthen claims",
                 "severity": "medium",
-                "confidence": 0.75
             })
         
         # 3. Check for unclear method
@@ -54,7 +51,6 @@ class WeaknessModule(NLPModule):
                 "category": "unclear_method",
                 "text": "Method description may lack detail - ensure clear explanation of approach",
                 "severity": "medium",
-                "confidence": 0.70
             })
         
         # 4. Check for ablation studies
@@ -64,7 +60,6 @@ class WeaknessModule(NLPModule):
                 "category": "missing_ablation",
                 "text": "No ablation study found - reviewers expect analysis of component contributions",
                 "severity": "medium",
-                "confidence": 0.80
             })
         
         # 5. Check limitations discussion
@@ -74,14 +69,12 @@ class WeaknessModule(NLPModule):
                 "category": "acknowledged_limitation",
                 "text": "Paper acknowledges limitations (good practice)",
                 "severity": "low",
-                "confidence": 0.95
             })
         else:
             weaknesses.append({
                 "category": "missing_limitations",
                 "text": "No limitations discussed - reviewers expect honest assessment of approach limits",
                 "severity": "medium",
-                "confidence": 0.75
             })
         
         # 6. Check novelty claims
@@ -91,14 +84,12 @@ class WeaknessModule(NLPModule):
                 "category": "limited_novelty",
                 "text": "Limited novelty indicators - clearly state what is new in your approach",
                 "severity": "high",
-                "confidence": 0.70
             })
         
         return ModuleResult(
             module="weaknesses",
-            model="OpenReview_classifier_baseline",
+            model="pattern_matching_weakness_baseline",
             status="completed",
-            confidence=0.68,
             findings=[{
                 "type": "weakness_analysis",
                 "weaknesses": weaknesses,
@@ -116,11 +107,7 @@ class WeaknessModule(NLPModule):
                 }
                 for w in weaknesses[:8]
             ],
-            metrics={
-                "precision": "0.61 (per category)",
-                "recall": "0.34 (baseline)",
-                "total_weaknesses": len(weaknesses)
-            },
+            metrics={"total_weaknesses": len(weaknesses)},
             limitations=[
                 "Using pattern matching baseline (fine-tuned classifier in Phase 2)",
                 "OpenReview comments not yet used for weakness categories",

@@ -29,20 +29,10 @@ class RelatedWorkModule(NLPModule):
         # Find citations/references
         citations = len(re.findall(r'\[\d+\]|\(\d{4}\)|\bet\s+al\.', text))
         
-        # Generate similar papers list (based on citation count)
-        similar_papers = []
-        for i in range(min(5, citations // 3)):
-            similar_papers.append({
-                "paper_id": f"related_{i+1}",
-                "title": f"Similar Paper on {methods[i] if i < len(methods) else 'Research Topic'}",
-                "similarity": round(0.85 - i*0.08, 2)
-            })
-        
         return ModuleResult(
             module=self.name,
-            model="SciBERT_baseline + pattern_matching",
+            model="pattern_matching_extraction",
             status="completed",
-            confidence=0.75,
             findings=[
                 {
                     "type": "methods_extracted",
@@ -62,15 +52,10 @@ class RelatedWorkModule(NLPModule):
                     "description": "Research claims and contributions stated"
                 }
             ],
-            evidence=similar_papers,
-            metrics={
-                "extraction_f1": "0.68 (baseline)",
-                "recall_at_5": "0.55",
-                "citations_found": citations
-            },
+            evidence=[],
+            metrics={"citations_found": citations},
             limitations=[
                 "Using baseline regex extraction (SciBERT fine-tuning in Phase 2)",
-                "SPECTER2 embeddings not yet implemented for semantic search",
-                "Retrieved papers are illustrative (full S2ORC corpus needed)"
+                "Research-paper retrieval and similarity ranking are not available yet; no related papers are returned."
             ]
         )

@@ -35,7 +35,9 @@ function UploadZone({ onUploadSuccess }) {
     accept: {
       'application/pdf': ['.pdf'],
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-      'text/plain': ['.txt']
+      'text/plain': ['.txt'],
+      'text/markdown': ['.md'],
+      'application/x-tex': ['.tex']
     },
     maxFiles: 1,
     disabled: uploading || success
@@ -96,7 +98,7 @@ function UploadZone({ onUploadSuccess }) {
                   Drag & drop or click to browse
                 </p>
                 <p className="text-xs text-slate-500 mt-2">
-                  Supports PDF, DOCX, TXT
+                  Supports PDF, DOCX, TXT, Markdown (.md), TeX
                 </p>
               </div>
               

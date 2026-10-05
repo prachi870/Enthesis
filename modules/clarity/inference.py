@@ -101,7 +101,7 @@ class FastClarityAnalyzer:
             if issues:
                 flagged.append({
                     "sentence_index": i,
-                    "sentence": s[:100] + "..." if len(s) > 100 else s,
+                    "sentence": s,
                     "issues": issues,
                     "word_count": len(s.split())
                 })
@@ -191,7 +191,6 @@ class ClarityModule(NLPModule):
             module=self.name,
             model="feature_based_clarity_baseline",
             status="completed",
-            confidence=0.4,  # Medium-low confidence for heuristic baseline
             findings=findings,
             evidence=evidence,
             metrics={"correlation": "TBD", "baseline_correlation": "TBD"},

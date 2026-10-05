@@ -5,7 +5,13 @@ from jose import JWTError, jwt
 import hashlib
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
+
+
+def normalize_identifier(value: Optional[str]) -> str:
+    """Normalize login identifiers so matching works reliably across cases and whitespace."""
+    return (value or '').strip().lower()
 
 from ..config import settings
 from ..database import get_db
@@ -58,9 +64,18 @@ def decode_token(token: str) -> TokenData:
         )
 
 
-def authenticate_user(db: Session, username: str, password: str) -> Optional[User]:
-    """Authenticate user with username and password"""
-    user = db.query(User).filter(User.username == username).first()
+def authenticate_user(db: Session, username_or_email: str, password: str) -> Optional[User]:
+    """Authenticate user with their username or email and password."""
+    normalized_identifier = normalize_identifier(username_or_email)
+    if not normalized_identifier:
+        return None
+
+    user = db.query(User).filter(
+        or_(
+            func.lower(func.trim(User.username)) == normalized_identifier,
+            func.lower(func.trim(User.email)) == normalized_identifier,
+        )
+    ).first()
     if not user:
         return None
     if not verify_password(password, user.hashed_password):
