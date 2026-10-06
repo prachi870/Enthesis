@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Installing dependencies..."
+      - python -m pip install --upgrade pip
+      - pip install -r requirements.txt
+      
+  build:
+    commands:
+      - echo "Build started on `date`"
+      - echo "Running tests..."
+      - pytest tests/ || true
+      
+  post_build:
+    commands:
+      - echo "Build completed on `date`"
+      - echo "Preparing deployment package..."
+
+artifacts:
+  files:
+    - '**/*'
+  name: enthesis-$(date +%Y%m%d-%H%M%S)

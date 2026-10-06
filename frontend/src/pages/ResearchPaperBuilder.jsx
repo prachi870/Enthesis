@@ -200,16 +200,24 @@ function ResearchPaperBuilder() {
     setError('')
     try {
       const saved = await persist()
-      if (!saved) return
+      if (!saved) {
+        setGenerating(false)
+        return
+      }
       const id = saved.paper_id || saved.id
       const generated = await generateResearchPaper(id)
       setRecord(generated)
       setContent(generated.generated_content || generated.generated_sections || generated.content || {})
       setAnalysis(generated.analysis_results || null)
       setIsGenerated(generated.is_generated === true)
+      
+      // Auto-download DOCX after generation
+      setGenerating(false)
+      await handleExport('docx')
     } catch (err) {
-      setError(err.message)
-    } finally {
+      console.error('Generation error:', err)
+      const errorMessage = err?.message || (typeof err === 'string' ? err : 'Paper generation failed. Please try again.')
+      setError(errorMessage)
       setGenerating(false)
     }
   }
@@ -418,7 +426,9 @@ function ResearchPaperBuilder() {
           </div>
         </div>
 
-        {error && <div role="alert" className="mb-5 rounded-lg border border-red-500/40 bg-red-950/50 p-4 text-red-200">{error}</div>}
+        {error && <div role="alert" className="mb-5 rounded-lg border border-red-500/40 bg-red-950/50 p-4 text-red-200">
+          {typeof error === 'string' ? error : JSON.stringify(error, null, 2)}
+        </div>}
 
         <div className="grid gap-6 lg:grid-cols-[minmax(300px,0.8fr)_minmax(0,1.2fr)]">
           <section className="h-fit rounded-2xl border border-slate-700 bg-slate-900/80 p-5">

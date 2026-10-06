@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { supabase, supabaseConfigurationError } from '../lib/supabase'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 function AuthCallback() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const started = useRef(false)
   const [error, setError] = useState('')
 
@@ -13,25 +13,29 @@ function AuthCallback() {
 
     const completeSignIn = async () => {
       try {
-        const callbackError =
-          new URLSearchParams(window.location.search).get('error_description') ||
-          new URLSearchParams(window.location.hash.slice(1)).get('error_description')
-        if (callbackError) throw new Error(callbackError)
-        if (!supabase) {
-          throw new Error(supabaseConfigurationError)
-        }
-        const { data, error: sessionError } = await supabase.auth.getSession()
-        if (sessionError) throw sessionError
-        if (!data.session?.access_token) {
-          throw new Error('No OAuth session was returned. Please try signing in again.')
+        const code = searchParams.get('code')
+        const state = searchParams.get('state')
+        const errorParam = searchParams.get('error')
+
+        if (errorParam) {
+          throw new Error(searchParams.get('error_description') || errorParam)
         }
 
-        const response = await fetch('/api/v1/auth/oauth/exchange', {
+        if (!code || !state) {
+          throw new Error('Missing authorization code. Please try signing in again.')
+        }
+
+        // Determine provider from state ('google' or 'github')
+        const provider = state
+
+        const response = await fetch('/api/v1/auth/oauth/callback', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ access_token: data.session.access_token }),
+          body: JSON.stringify({ code, provider }),
         })
+        
         const result = await response.json()
+        
         if (!response.ok) {
           throw new Error(result.detail || 'Unable to complete OAuth sign-in.')
         }
@@ -46,7 +50,7 @@ function AuthCallback() {
     }
 
     completeSignIn()
-  }, [navigate])
+  }, [navigate, searchParams])
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-slate-950 px-6 text-white">

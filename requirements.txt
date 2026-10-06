@@ -37,3 +37,7 @@ wandb>=0.15.0
 numpy>=1.24.0
 pandas>=2.0.0
 tqdm>=4.65.0
+
+# OAuth Authentication
+authlib>=1.3.0
+itsdangerous>=2.1.0

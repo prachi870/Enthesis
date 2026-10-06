@@ -32,26 +32,35 @@ reviewer_room = ReviewerRoom()
 action_center = ActionCenter()
 
 
-def _get(paper_id: str) -> PaperRun:
-    """Get paper run by ID"""
+def _get(paper_id: str, current_user: User = None) -> PaperRun:
+    """Get paper run by ID, optionally checking user ownership"""
     run = store.get(paper_id)
     if not run:
         raise HTTPException(404, "Paper not found")
+    
+    # If user is provided, check ownership
+    if current_user and run.user_id and run.user_id != current_user.username:
+        raise HTTPException(403, "You don't have access to this paper")
+    
     return run
 
 
 @router.get("/list")
 def list_papers(
-    search: str = None
+    search: str = None,
+    current_user: User = Depends(get_current_active_user)
 ):
-    """List all uploaded papers with optional search"""
+    """List all uploaded papers for the current user with optional search"""
     runs = store.list_all()
+    
+    # Filter by current user
+    user_runs = [r for r in runs if r.user_id == current_user.username]
     
     # Filter by search term if provided
     if search:
         search_lower = search.lower()
-        runs = [
-            r for r in runs
+        user_runs = [
+            r for r in user_runs
             if search_lower in r.filename.lower() or
             search_lower in (r.author or "").lower()
         ]
@@ -67,7 +76,7 @@ def list_papers(
                 "results": r.results,
                 "errors": r.errors
             }
-            for r in runs
+            for r in user_runs
         ]
     }
 
@@ -75,7 +84,8 @@ def list_papers(
 @router.post("/upload")
 async def upload(
     file: UploadFile = File(...),
-    author: str = Form("")
+    author: str = Form(""),
+    current_user: User = Depends(get_current_active_user)
 ):
     """Upload a new paper and automatically start analysis"""
     data = await file.read()
@@ -88,7 +98,8 @@ async def upload(
         paper_id=uuid.uuid4().hex[:12],
         filename=file.filename or "draft",
         text=text,
-        author=author or "anonymous"
+        author=author or current_user.full_name or current_user.username,
+        user_id=current_user.username  # Associate paper with current user
     )
     store.save(run)
     
@@ -98,6 +109,7 @@ async def upload(
         store.save(run)
     except PipelineError as e:
         # Even if start fails, return the paper_id
+        pass
         pass
     
     return {
@@ -110,10 +122,11 @@ async def upload(
 
 @router.get("/{paper_id}")
 def get_paper(
-    paper_id: str
+    paper_id: str,
+    current_user: User = Depends(get_current_active_user)
 ):
     """Get paper details by ID"""
-    r = _get(paper_id)
+    r = _get(paper_id, current_user)
     return {
         "paper_id": r.paper_id,
         "filename": r.filename,

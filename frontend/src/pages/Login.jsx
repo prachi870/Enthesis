@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Sparkles, Mail, Lock, LogIn } from 'lucide-react'
 import AuthShowcase from '../components/AuthShowcase'
 import AuthProductIntro from '../components/AuthProductIntro'
-import { supabase, supabaseConfigurationError } from '../lib/supabase'
 
 function Login() {
   const navigate = useNavigate()
@@ -17,20 +16,19 @@ function Login() {
 
   const handleOAuthSignIn = async (provider) => {
     setError('')
-    if (!supabase) {
-      setError(supabaseConfigurationError)
-      return
-    }
-
     setOauthLoading(provider)
+    
     try {
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: { redirectTo: `${window.location.origin}/auth/callback` },
-      })
-      if (oauthError) throw oauthError
+      const response = await fetch(`/api/v1/auth/oauth/${provider}/login`)
+      const data = await response.json()
+      
+      if (data.url) {
+        // Redirect to OAuth provider
+        window.location.href = data.url
+      } else {
+        throw new Error('Failed to initiate OAuth login')
+      }
     } catch (err) {
-      if (import.meta.env.DEV) console.error(`${provider} OAuth sign-in failed:`, err)
       setError(err.message || `Unable to start ${provider} sign-in. Please try again.`)
       setOauthLoading('')
     }
