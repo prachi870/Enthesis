@@ -19,7 +19,8 @@ function Login() {
     setOauthLoading(provider)
     
     try {
-      const response = await fetch(`/api/v1/auth/oauth/${provider}/login`)
+      const apiUrl = import.meta.env.VITE_API_URL || ''
+      const response = await fetch(`${apiUrl}/api/v1/auth/oauth/${provider}/login`)
       const data = await response.json()
       
       if (data.url) {
@@ -43,8 +44,9 @@ function Login() {
       const username = String(formData.username || '').trim()
       const password = String(formData.password || '').trim()
 
+      const apiUrl = import.meta.env.VITE_API_URL || ''
       // Call real login API
-      const response = await fetch('/api/v1/auth/login', {
+      const response = await fetch(`${apiUrl}/api/v1/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
