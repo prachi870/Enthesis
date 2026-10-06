@@ -8,7 +8,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://enthesis-backend.onrender.com/api/:path*"
+      "destination": "https://enthesis-1.onrender.com/api/:path*"
     }
   ],
   "routes": [
@@ -17,8 +17,5 @@
       "dest": "/",
       "status": 200
     }
-  ],
-  "env": {
-    "VITE_API_URL": "https://enthesis-backend.onrender.com"
-  }
+  ]
 }
